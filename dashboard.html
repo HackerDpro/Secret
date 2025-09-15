@@ -1,331 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Schedule</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <header class="navbar">
-      <h1 class="navbar-title">My Schedule</h1>
-      <button id="logout-btn" class="logout-btn">Log Out</button>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <title>Regina Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f9f9f9; }
+    header { background: #2d3748; color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 1.25rem; }
+    #server-status { font-size: 0.9rem; opacity: 0.8; }
+    #user-email { margin-left: 1rem; font-weight: bold; }
+    #logoutBtn { background: #e53e3e; border: none; color: #fff; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; }
+    #main { padding: 1rem; }
+    #weekGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+    .day-col { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 0.5rem; }
+    .day-col h3 { margin-top: 0; font-size: 1rem; border-bottom: 1px solid #eee; }
+    .course-card { background: #edf2f7; padding: 0.5rem; border-radius: 4px; margin: 0.25rem 0; cursor: pointer; }
+    #nextCourseContainer, #dailyPlanner { margin-top: 1rem; }
+    #openAddBtn { background: #3182ce; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+    /* Modal */
+    #modalBackdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+    #modal { background: #fff; padding: 1rem; border-radius: 6px; width: 300px; }
+    #modal h2 { margin-top: 0; }
+    #modal input, #modal select { width: 100%; padding: 0.25rem; margin-bottom: 0.5rem; }
+    #modal button { margin-right: 0.5rem; }
+    #modalError { color: red; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Regina Tracker</h1>
+    <div>
+      <span id="server-status">Connecting…</span>
+      <span id="user-email"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-    <main class="dashboard-container">
-      <section class="widgets-section">
-        <div class="widget next-course-widget">
-          <h3>Next Course:</h3>
-          <p id="next-course-info">No upcoming courses</p>
-        </div>
-        <div class="widget daily-planner-widget">
-          <h3>Today's Schedule:</h3>
-          <ul id="daily-planner-list">
-            <li>No courses today</li>
-          </ul>
-        </div>
-      </section>
+  <div id="main">
+    <button id="openAddBtn">+ Add Course</button>
+    <div id="weekGrid"></div>
+    <div id="nextCourseContainer"></div>
+    <div id="dailyPlanner"></div>
+  </div>
 
-      <section class="weekly-schedule-grid">
-        <div class="day-column" id="monday">
-          <h4>Monday</h4>
-        </div>
-        <div class="day-column" id="tuesday">
-          <h4>Tuesday</h4>
-        </div>
-        <div class="day-column" id="wednesday">
-          <h4>Wednesday</h4>
-        </div>
-        <div class="day-column" id="thursday">
-          <h4>Thursday</h4>
-        </div>
-        <div class="day-column" id="friday">
-          <h4>Friday</h4>
-        </div>
-      </section>
-
-      <button class="add-course-btn" id="add-course-btn">+</button>
-
-      <div id="course-modal" class="modal">
-        <div class="modal-content">
-          <span class="close-btn">&times;</span>
-          <h2 id="modal-title">Add New Course</h2>
-          <form id="course-form">
-            <input type="hidden" id="course-id" />
-            <label for="day-select">Day:</label>
-            <select id="day-select" required>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-            </select>
-            <label for="start-time-input">Start Time:</label>
-            <input type="time" id="start-time-input" required />
-            <label for="end-time-input">End Time:</label>
-            <input type="time" id="end-time-input" required />
-            <label for="course-name-input">Course Name:</label>
-            <input type="text" id="course-name-input" required />
-            <label for="professor-input">Professor:</label>
-            <input type="text" id="professor-input" required />
-            <label for="location-input">Location:</label>
-            <input type="text" id="location-input" required />
-            <div class="form-buttons">
-              <button type="submit" id="save-btn">Save Course</button>
-              <button type="button" id="delete-btn" class="delete-btn" style="display: none;">Delete</button>
-            </div>
-          </form>
-        </div>
+  <!-- Modal -->
+  <div id="modalBackdrop">
+    <div id="modal">
+      <h2 id="modalTitle">Add Course</h2>
+      <label>Day</label>
+      <select id="fieldDay">
+        <option value="">--Select--</option>
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+      </select>
+      <label>Start Time</label>
+      <input type="time" id="fieldStart" />
+      <label>End Time</label>
+      <input type="time" id="fieldEnd" />
+      <label>Course Name</label>
+      <input type="text" id="fieldCourse" />
+      <label>Professor</label>
+      <input type="text" id="fieldProfessor" />
+      <label>Location</label>
+      <input type="text" id="fieldLocation" />
+      <div id="modalError"></div>
+      <div>
+        <button id="saveBtn">Save</button>
+        <button id="deleteBtn" style="display:none;background:#e53e3e;color:#fff;">Delete</button>
+        <button id="cancelBtn">Cancel</button>
       </div>
-    </main>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-      // Supabase Configuration
-      const SUPABASE_URL = "https://izyofljxfnmcrtyhpkhp.supabase.co";
-      const SUPABASE_ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eW9mbGp4Zm5tY3J0eWhwa2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODM3MDgsImV4cCI6MjA3MzE1OTcwOH0.LgnXAHlFJ8GEZDpUMG9dXeioCd7Q25pL3hnXcTjkq4Y";
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      // DOM Elements
-      const courseModal = document.getElementById("course-modal");
-      const addCourseBtn = document.getElementById("add-course-btn");
-      const closeBtn = document.querySelector(".close-btn");
-      const courseForm = document.getElementById("course-form");
-      const modalTitle = document.getElementById("modal-title");
-      const saveBtn = document.getElementById("save-btn");
-      const deleteBtn = document.getElementById("delete-btn");
-
-      // Check User Session
-      async function checkSession() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          window.location.href = "index.html";
-        }
-      }
-
-      // Fetch and Display Courses
-      async function fetchCourses() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        
-        const { data: courses, error } = await supabase
-          .from("schedules")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("day_of_week", { ascending: true })
-          .order("start_time", { ascending: true });
-
-        if (error) {
-          console.error("Error fetching courses:", error);
-          return;
-        }
-
-        // Clear existing courses
-        document.querySelectorAll(".day-column").forEach(column => {
-          if (column.id !== 'monday' && column.id !== 'tuesday' && column.id !== 'wednesday' && column.id !== 'thursday' && column.id !== 'friday') {
-            column.innerHTML = '';
-          }
-        });
-        
-        // Populate the weekly grid
-        courses.forEach(course => {
-          const dayColumn = document.getElementById(course.day.toLowerCase());
-          if (dayColumn) {
-            const courseWidget = document.createElement("div");
-            courseWidget.classList.add("course-widget");
-            courseWidget.dataset.id = course.id;
-            courseWidget.innerHTML = `
-              <strong>${course.course_name}</strong>
-              <p>${course.start_time} - ${course.end_time}</p>
-              <p>${course.professor}</p>
-            `;
-            courseWidget.addEventListener("click", () => openEditModal(course));
-            dayColumn.appendChild(courseWidget);
-          }
-        });
-
-        // Update Next Course widget and Daily Planner
-        updateWidgets(courses);
-      }
-
-      function updateWidgets(courses) {
-        const now = new Date();
-        const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-        const today = days[now.getDay()];
-        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-        // Find next course
-        let nextCourse = null;
-        for (const course of courses) {
-          if (course.day.toLowerCase() === today && course.start_time > currentTime) {
-            if (!nextCourse || course.start_time < nextCourse.start_time) {
-              nextCourse = course;
-            }
-          }
-        }
-        
-        if (nextCourse) {
-          document.getElementById("next-course-info").innerHTML = `
-            <strong>${nextCourse.course_name}</strong>
-            <p>Time: ${nextCourse.start_time}</p>
-            <p>Professor: ${nextCourse.professor}</p>
-            <p>Location: ${nextCourse.location}</p>
-          `;
-        } else {
-          document.getElementById("next-course-info").textContent = "No upcoming courses today.";
-        }
-        
-        // Populate daily planner
-        const dailyCourses = courses.filter(course => course.day.toLowerCase() === today);
-        const dailyList = document.getElementById("daily-planner-list");
-        dailyList.innerHTML = '';
-        if (dailyCourses.length > 0) {
-          dailyCourses.forEach(course => {
-            const li = document.createElement("li");
-            li.textContent = `${course.start_time} - ${course.course_name}`;
-            dailyList.appendChild(li);
-          });
-        } else {
-          const li = document.createElement("li");
-          li.textContent = "No courses today.";
-          dailyList.appendChild(li);
-        }
-      }
-
-      // Open Add Course Modal
-      addCourseBtn.addEventListener("click", () => {
-        courseForm.reset();
-        document.getElementById("course-id").value = "";
-        modalTitle.textContent = "Add New Course";
-        saveBtn.textContent = "Save Course";
-        deleteBtn.style.display = "none";
-        courseModal.style.display = "flex";
-      });
-
-      // Open Edit Course Modal
-      function openEditModal(course) {
-        document.getElementById("course-id").value = course.id;
-        document.getElementById("day-select").value = course.day;
-        document.getElementById("start-time-input").value = course.start_time;
-        document.getElementById("end-time-input").value = course.end_time;
-        document.getElementById("course-name-input").value = course.course_name;
-        document.getElementById("professor-input").value = course.professor;
-        document.getElementById("location-input").value = course.location;
-
-        modalTitle.textContent = "Edit Course";
-        saveBtn.textContent = "Update Course";
-        deleteBtn.style.display = "inline-block";
-        courseModal.style.display = "flex";
-      }
-
-      // Close Modal
-      closeBtn.addEventListener("click", () => {
-        courseModal.style.display = "none";
-      });
-
-      window.addEventListener("click", (event) => {
-        if (event.target === courseModal) {
-          courseModal.style.display = "none";
-        }
-      });
-
-      // Calculate end time
-      document.getElementById("start-time-input").addEventListener("change", (event) => {
-        const startTime = event.target.value;
-        if (startTime) {
-          const [hours, minutes] = startTime.split(':').map(Number);
-          const endDate = new Date();
-          endDate.setHours(hours, minutes + 50);
-          const endHours = String(endDate.getHours()).padStart(2, '0');
-          const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
-          document.getElementById("end-time-input").value = `${endHours}:${endMinutes}`;
-        }
-      });
-
-      // Handle Form Submission (Add/Edit)
-      courseForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const courseId = document.getElementById("course-id").value;
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const courseData = {
-          day: document.getElementById("day-select").value,
-          start_time: document.getElementById("start-time-input").value,
-          end_time: document.getElementById("end-time-input").value,
-          course_name: document.getElementById("course-name-input").value,
-          professor: document.getElementById("professor-input").value,
-          location: document.getElementById("location-input").value,
-          user_id: user.id,
-        };
-
-        if (courseId) {
-          // UPDATE an existing course
-          const { error } = await supabase
-            .from("schedules")
-            .update(courseData)
-            .eq("id", courseId);
-
-          if (error) {
-            console.error("Error updating course:", error);
-            alert("Failed to update course.");
-          } else {
-            alert("Course updated successfully!");
-          }
-        } else {
-          // INSERT a new course
-          const { error } = await supabase
-            .from("schedules")
-            .insert([courseData]);
-
-          if (error) {
-            console.error("Error adding new course:", error);
-            alert("Failed to add new course.");
-          } else {
-            alert("New course added successfully!");
-          }
-        }
-
-        courseModal.style.display = "none";
-        fetchCourses(); // Refresh the dashboard
-      });
-
-      // Handle Delete Course
-      deleteBtn.addEventListener("click", async () => {
-        const courseId = document.getElementById("course-id").value;
-        if (confirm("Are you sure you want to delete this course?")) {
-          const { error } = await supabase
-            .from("schedules")
-            .delete()
-            .eq("id", courseId);
-
-          if (error) {
-            console.error("Error deleting course:", error);
-            alert("Failed to delete course.");
-          } else {
-            alert("Course deleted successfully!");
-          }
-          courseModal.style.display = "none";
-          fetchCourses(); // Refresh the dashboard
-        }
-      });
-
-      // Handle Logout
-      document.getElementById("logout-btn").addEventListener("click", async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error("Error signing out:", error);
-        } else {
-          window.location.href = "index.html";
-        }
-      });
-
-      // Initial page load
-      document.addEventListener("DOMContentLoaded", () => {
-        checkSession();
-        fetchCourses();
-      });
-    </script>
-  </body>
+  <script type="module" src="dashboard.js"></script>
+</body>
 </html>
