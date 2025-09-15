@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Regina Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regina Tracker Login</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,66 +13,72 @@
     />
   </head>
   <body>
-    <nav class="navbar">
-      <h1>Regina Tracker</h1>
-      <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="#">Courses</a>
-      </div>
-      <div class="user-info">
-        <span id="user-email"></span>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
-      </div>
-    </nav>
-
-    <div class="dashboard-container">
-      <button id="openAddBtn" class="add-course-btn">+ Add Course</button>
-
-      <div class="info-grid">
-        <div id="nextCourseContainer" class="info-card">
-          <h3>Next Course</h3>
-        </div>
-        <div id="dailyPlanner" class="info-card">
-          <h3>Today's Schedule</h3>
-        </div>
-      </div>
-
-      <div id="weekGrid"></div>
+    <div class="login-container">
+      <form id="auth-form" class="login-form">
+        <h1>Welcome</h1>
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit" id="login-btn">Log In</button>
+        <button type="submit" id="signup-btn">Sign Up</button>
+      </form>
     </div>
 
-    <div id="modalBackdrop">
-      <div id="modal">
-        <h2 id="modalTitle">Add Course</h2>
-        <label>Day</label>
-        <select id="fieldDay">
-          <option value="">--Select--</option>
-          <option>Monday</option>
-          <option>Tuesday</option>
-          <option>Wednesday</option>
-          <option>Thursday</option>
-          <option>Friday</option>
-        </select>
-        <label>Start Time</label>
-        <input type="time" id="fieldStart" />
-        <label>End Time</label>
-        <input type="time" id="fieldEnd" />
-        <label>Course Name</label>
-        <input type="text" id="fieldCourse" />
-        <label>Professor</label>
-        <input type="text" id="fieldProfessor" />
-        <label>Location</label>
-        <input type="text" id="fieldLocation" />
-        <label>Color</label>
-        <input type="color" id="fieldColor" value="#64b5f6" />
-        <div id="modalError"></div>
-        <div class="modal-buttons">
-          <button id="saveBtn">Save</button>
-          <button id="deleteBtn">Delete</button>
-          <button id="cancelBtn">Cancel</button>
-        </div>
-      </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = "https://izyofljxfnmcrtyhpkhp.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eW9mbGp4Zm5tY3J0eWhwa2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODM3MDgsImV4cCI6MjA3MzE1OTcwOH0.LgnXAHlFJ8GEZDpUMG9dXeioCd7Q25pL3hnXcTjkq4Y";
 
-    <script type="module" src="dashboard.js"></script>
+      const supabaseClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+      async function checkSession() {
+        const {
+          data: { user },
+        } = await supabaseClient.auth.getUser();
+        if (user) {
+          window.location.href = "dashboard.html";
+        }
+      }
+
+      async function handleAuth(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        if (event.submitter.id === "signup-btn") {
+          const { error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+          });
+          if (error) {
+            alert(error.message);
+          } else {
+            alert(
+              "Sign up successful! Please check your email to confirm your account."
+            );
+          }
+        } else if (event.submitter.id === "login-btn") {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (error) {
+            alert(error.message);
+          } else {
+            window.location.href = "dashboard.html";
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        checkSession();
+        document
+          .getElementById("auth-form")
+          .addEventListener("submit", handleAuth);
+      });
+    </script>
   </body>
 </html>
