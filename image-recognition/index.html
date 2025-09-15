@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartschool Screenshot Processor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Smartschool Screenshot Processor</h1>
+        <p>Drag & Drop a screenshot for each day of the week.</p>
+
+        <div class="upload-grid">
+            <div class="upload-zone">
+                <h3>Monday</h3>
+                <div class="upload-area" id="upload-monday">
+                    <p>Drop here</p>
+                </div>
+                <input type="file" id="file-monday" accept="image/*" style="display: none;">
+            </div>
+            <div class="upload-zone">
+                <h3>Tuesday</h3>
+                <div class="upload-area" id="upload-tuesday">
+                    <p>Drop here</p>
+                </div>
+                <input type="file" id="file-tuesday" accept="image/*" style="display: none;">
+            </div>
+            <div class="upload-zone">
+                <h3>Wednesday</h3>
+                <div class="upload-area" id="upload-wednesday">
+                    <p>Drop here</p>
+                </div>
+                <input type="file" id="file-wednesday" accept="image/*" style="display: none;">
+            </div>
+            <div class="upload-zone">
+                <h3>Thursday</h3>
+                <div class="upload-area" id="upload-thursday">
+                    <p>Drop here</p>
+                </div>
+                <input type="file" id="file-thursday" accept="image/*" style="display: none;">
+            </div>
+            <div class="upload-zone">
+                <h3>Friday</h3>
+                <div class="upload-area" id="upload-friday">
+                    <p>Drop here</p>
+                </div>
+                <input type="file" id="file-friday" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <button id="process-button">Process All</button>
+
+        <div id="loading-message" style="display: none;">
+            <p>Processing images, please wait...</p>
+        </div>
+        <div id="results-area" style="display: none;">
+            <h2>Extracted Data:</h2>
+            <pre id="extracted-data"></pre>
+        </div>
+    </div>
+
+    <script src="frontend.js"></script>
+</body>
+</html>
