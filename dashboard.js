@@ -1,16 +1,14 @@
-// dashboard.js
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ---------- CONFIG ----------
 const SUPABASE_URL = 'https://izyofljxfnmcrtyhpkhp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eW9mbGp4Zm5tY3J0eWhwa2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODM3MDgsImV4cCI6MjA3MzE1OTcwOH0.LgnXAHlFJ8GEZDpUMG9dXeioCd7Q25pL3hnXcTjkq4Y'; // replace with real anon key
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eW9mbGp4Zm5tY3J0eWhwa2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODM3MDgsImV4cCI6MjA3MzE1OTcwOH0.LgnXAHlFJ8GEZDpUMG9dXeioCd7Q25pL3hnXcTjkq4Y';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------- DOM ----------
 const weekGrid = document.getElementById('weekGrid');
 const nextCourseContainer = document.getElementById('nextCourseContainer');
 const dailyPlanner = document.getElementById('dailyPlanner');
-const serverStatus = document.getElementById('server-status');
 const userEmailEl = document.getElementById('user-email');
 
 const modalBackdrop = document.getElementById('modalBackdrop');
@@ -21,6 +19,7 @@ const fieldEnd = document.getElementById('fieldEnd');
 const fieldCourse = document.getElementById('fieldCourse');
 const fieldProfessor = document.getElementById('fieldProfessor');
 const fieldLocation = document.getElementById('fieldLocation');
+const fieldColor = document.getElementById('fieldColor');
 const saveBtn = document.getElementById('saveBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const openAddBtn = document.getElementById('openAddBtn');
@@ -37,7 +36,25 @@ const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 openAddBtn.addEventListener('click', () => openAddModal());
 cancelBtn.addEventListener('click', closeModal);
 modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
-fieldStart.addEventListener('change', onStartTimeChange);
+
+fieldStart.addEventListener('input', () => {
+    const startTime = fieldStart.value;
+    if (startTime) {
+        const [hours, minutes] = startTime.split(':').map(Number);
+        let endHours = hours;
+        let endMinutes = minutes + 50;
+
+        if (endMinutes >= 60) {
+            endMinutes -= 60;
+            endHours += 1;
+        }
+
+        const formattedEndHours = String(endHours).padStart(2, '0');
+        const formattedEndMinutes = String(endMinutes).padStart(2, '0');
+        fieldEnd.value = `${formattedEndHours}:${formattedEndMinutes}`;
+    }
+});
+
 saveBtn.addEventListener('click', onSave);
 deleteBtn.addEventListener('click', onDelete);
 logoutBtn.addEventListener('click', onLogout);
@@ -46,17 +63,14 @@ logoutBtn.addEventListener('click', onLogout);
 (async function init() {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !session) {
-    serverStatus.textContent = 'Not logged in';
-    userEmailEl.textContent = '';
+    userEmailEl.textContent = 'Not logged in';
     return;
   }
-
   currentUser = session.user;
   userEmailEl.textContent = currentUser.email ?? 'Unknown user';
 
   renderEmptyWeekGrid();
   await loadSchedulesAndRender();
-  serverStatus.textContent = 'Connected';
 })();
 
 // ---------- HELPERS ----------
@@ -99,7 +113,8 @@ function renderWeekGrid(schedules) {
     if (!col) return;
     const card = document.createElement('div');
     card.className = 'course-card';
-    card.textContent = `${course.start_time}-${course.end_time} ${course.course_name}`;
+    card.textContent = `${course.start_time} - ${course.end_time}: ${course.course_name}`;
+    card.style.backgroundColor = course.color || '#64b5f6'; // Use saved color or a default
     card.addEventListener('click', () => openEditModal(course));
     col.appendChild(card);
   });
@@ -107,7 +122,7 @@ function renderWeekGrid(schedules) {
 
 function renderNextAndDaily(schedules) {
   const now = new Date();
-  const todayDay = DAYS[now.getDay()-1]; // Monday=1
+  const todayDay = DAYS[now.getDay()-1];
   const todayTime = now.getHours()*60+now.getMinutes();
 
   let upcoming = null;
@@ -117,7 +132,7 @@ function renderNextAndDaily(schedules) {
     if (course.day === todayDay) {
       daily.push(course);
       if (timeToMinutes(course.start_time) >= todayTime) {
-        if (!upcoming || course.start_time < upcoming.start_time) {
+        if (!upcoming || timeToMinutes(course.start_time) < timeToMinutes(upcoming.start_time)) {
           upcoming = course;
         }
       }
@@ -125,10 +140,10 @@ function renderNextAndDaily(schedules) {
   }
 
   nextCourseContainer.innerHTML = '<h3>Next Course</h3>' +
-    (upcoming ? `${upcoming.start_time} ${upcoming.course_name}` : 'None');
+    (upcoming ? `<div class="course-info-list"><p><strong>Time:</strong> ${upcoming.start_time} - ${upcoming.end_time}</p><p><strong>Course:</strong> ${upcoming.course_name}</p><p><strong>Location:</strong> ${upcoming.location || 'N/A'}</p></div>` : '<p>No upcoming courses today.</p>');
 
-  dailyPlanner.innerHTML = '<h3>Today</h3>' +
-    (daily.length ? daily.map(c=>`${c.start_time}-${c.end_time} ${c.course_name}`).join('<br>') : 'No courses');
+  dailyPlanner.innerHTML = '<h3>Today\'s Schedule</h3>' +
+    (daily.length ? daily.map(c=>`<p>${c.start_time}-${c.end_time} ${c.course_name}</p>`).join('') : '<p>No courses scheduled for today.</p>');
 }
 
 // ---------- MODAL ----------
@@ -141,9 +156,10 @@ function openAddModal() {
   fieldCourse.value = '';
   fieldProfessor.value = '';
   fieldLocation.value = '';
+  fieldColor.value = '#64b5f6'; // Default color
   deleteBtn.style.display = 'none';
   modalError.textContent = '';
-  modalBackdrop.style.display = 'flex';
+  modalBackdrop.classList.add('show');
 }
 
 function openEditModal(course) {
@@ -155,19 +171,14 @@ function openEditModal(course) {
   fieldCourse.value = course.course_name;
   fieldProfessor.value = course.professor;
   fieldLocation.value = course.location;
+  fieldColor.value = course.color || '#64b5f6'; // Use saved color or default
   deleteBtn.style.display = 'inline-block';
   modalError.textContent = '';
-  modalBackdrop.style.display = 'flex';
+  modalBackdrop.classList.add('show');
 }
 
 function closeModal() {
-  modalBackdrop.style.display = 'none';
-}
-
-function onStartTimeChange() {
-  if (fieldStart.value && fieldEnd.value && fieldEnd.value <= fieldStart.value) {
-    fieldEnd.value = '';
-  }
+  modalBackdrop.classList.remove('show');
 }
 
 // ---------- CRUD ----------
@@ -185,7 +196,8 @@ async function onSave() {
     end_time: fieldEnd.value,
     course_name: fieldCourse.value.trim(),
     professor: fieldProfessor.value.trim(),
-    location: fieldLocation.value.trim()
+    location: fieldLocation.value.trim(),
+    color: fieldColor.value
   };
 
   if (!payload.day || !payload.start_time || !payload.end_time || !payload.course_name) {
@@ -199,23 +211,28 @@ async function onSave() {
 
   try {
     if (editingCourseId) {
-      const { error } = await supabase
+      // Update the specific course
+      const { error: updateError } = await supabase
         .from('schedules')
-        .update({
-          day: payload.day,
-          start_time: payload.start_time,
-          end_time: payload.end_time,
-          course_name: payload.course_name,
-          professor: payload.professor,
-          location: payload.location
-        })
+        .update(payload)
         .eq('id', editingCourseId)
         .eq('user_id', currentUser.id);
-      if (error) throw error;
+      if (updateError) throw updateError;
     } else {
-      const { error } = await supabase.from('schedules').insert([payload]);
-      if (error) throw error;
+      // Insert a new course
+      const { error: insertError } = await supabase.from('schedules').insert([payload]);
+      if (insertError) throw insertError;
     }
+    
+    // Update all other courses with the same name
+    const { error: batchUpdateError } = await supabase
+      .from('schedules')
+      .update({ color: payload.color })
+      .eq('user_id', currentUser.id)
+      .eq('course_name', payload.course_name);
+
+    if (batchUpdateError) throw batchUpdateError;
+
     closeModal();
     await loadSchedulesAndRender();
   } catch (err) {
@@ -246,6 +263,6 @@ async function onLogout() {
   if (error) {
     alert('Logout failed: ' + error.message);
   } else {
-    window.location.href = '/login.html'; // redirect to login
+    window.location.href = '/index.html';
   }
 }

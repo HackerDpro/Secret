@@ -1,65 +1,379 @@
+:root {
+  --background-color: #1a1a2e;
+  --card-background: #202030;
+  --text-color: #e0e0e0;
+  --accent-color: #00bcd4; /* Cyan */
+  --accent-light: #48d9e9;
+  --nav-background: rgba(30, 30, 45, 0.8);
+  --button-color: #e94560; /* Pink */
+  --button-hover: #ff6d83;
+  --delete-button: #e53e3e;
+  --delete-hover: #ff5252;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f0f2f5;
-    margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.login-container, .dashboard-container {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 350px;
+/* --- Nav Bar --- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: var(--nav-background);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
-h1 {
-    color: #333;
-    margin-bottom: 1.5rem;
+.navbar h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  letter-spacing: 1px;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-    margin-top: 0.5rem;
+.nav-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-button:hover {
-    background-color: #0056b3;
+.nav-links a:hover {
+  color: var(--accent-light);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info span {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.logout-btn {
+  background: var(--button-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: var(--button-hover);
+}
+
+/* --- Dashboard Layout --- */
+.dashboard-container {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.add-course-btn {
+  background: var(--button-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  margin-bottom: 2rem;
+  align-self: flex-start;
+}
+
+.add-course-btn:hover {
+  background-color: var(--button-hover);
+  transform: scale(1.05);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background-color: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-card h3 {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
+}
+
+.course-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#weekGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.day-col {
+  background-color: var(--card-background);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.day-col h3 {
+  font-size: 1.2rem;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--accent-color);
+  padding-bottom: 0.5rem;
+}
+
+.courses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.course-card {
+  padding: 0.75rem;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Modal Pop-up --- */
+#modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#modalBackdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#modal {
+  background-color: var(--card-background);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  max-height: 90vh; /* Make modal height responsive */
+  overflow-y: auto; /* Add scrollbar if content overflows */
+}
+
+#modalBackdrop.show #modal {
+  transform: scale(1);
+}
+
+#modal h2 {
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+#modal label {
+  color: var(--accent-light);
+  font-weight: 500;
+}
+
+#modal input,
+#modal select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #333;
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+#modal input:focus,
+#modal select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+#modal div.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#modal button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#modal #saveBtn {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+#modal #saveBtn:hover {
+  background-color: var(--accent-light);
+  transform: translateY(-2px);
+}
+
+#modal #deleteBtn {
+  background-color: var(--delete-button);
+  color: white;
+}
+
+#modal #deleteBtn:hover {
+  background-color: var(--delete-hover);
+  transform: translateY(-2px);
+}
+
+#modal #cancelBtn {
+  background-color: #555;
+  color: var(--text-color);
+}
+
+#modal #cancelBtn:hover {
+  background-color: #777;
+  transform: translateY(-2px);
+}
+
+#modalError {
+  color: var(--delete-button);
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* --- Login Page --- */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.login-form {
+  background-color: var(--card-background);
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-form h1 {
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.login-form input {
+  padding: 1rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #333;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.login-form button {
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#login-btn {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+#login-btn:hover {
+  background-color: var(--accent-light);
 }
 
 #signup-btn {
-    background-color: #28a745;
+  background-color: var(--button-color);
+  color: white;
 }
 
 #signup-btn:hover {
-    background-color: #218838;
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 2rem;
+  background-color: var(--button-hover);
 }
